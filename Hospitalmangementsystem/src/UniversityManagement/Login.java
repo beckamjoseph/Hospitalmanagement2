@@ -1,35 +1,27 @@
 package UniversityManagement;
 
-import java.awt.Color;
-import java.awt.Font;
-import java.awt.Image;
+import javax.swing.*;
+import java.awt.*;
 import java.awt.event.*;
-//import java.sql.ResultSet;
-//import java.sql.*;
+import java.io.BufferedReader;
+import java.io.FileReader;
+import java.io.IOException;
 
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JFrame;
-import javax.swing.JLabel;
-//import javax.swing.JOptionPane;
-import javax.swing.JPasswordField;
-import javax.swing.JTextField;
-
-//import com.mysql.cj.xdevapi.Result;
-
-
-public class Login extends JFrame implements ActionListener{
+public class Login extends JFrame implements ActionListener {
     JButton login, cancel;
-    // sql
-    JTextField tfusername, tfpassword;
+    JTextField tfusername;
+    JPasswordField tfpassword;
 
-    Login () {
-
-        getContentPane().setBackground(Color.WHITE);
+    Login() {
+        // Set up the frame
+        setTitle("Login");
+        setSize(600, 300);
+        setLocationRelativeTo(null);
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLayout(null);
+        getContentPane().setBackground(Color.WHITE);
 
-        //username
-
+        // Username label and text field
         JLabel lbusername = new JLabel("Username");
         lbusername.setBounds(40, 20, 100, 20);
         add(lbusername);
@@ -38,9 +30,7 @@ public class Login extends JFrame implements ActionListener{
         tfusername.setBounds(150, 20, 150, 20);
         add(tfusername);
 
-
-        //password
-
+        // Password label and password field
         JLabel lbpassword = new JLabel("Password");
         lbpassword.setBounds(40, 70, 100, 20);
         add(lbpassword);
@@ -49,57 +39,65 @@ public class Login extends JFrame implements ActionListener{
         tfpassword.setBounds(150, 70, 150, 20);
         add(tfpassword);
 
-        //buttons login and cancel
-
+        // Login button
         login = new JButton("Login");
         login.setBounds(40, 140, 120, 30);
         login.setBackground(Color.BLACK);
         login.setForeground(Color.WHITE);
         login.addActionListener(this);
-        login.setFont(new Font("Tahoma", Font.BOLD, 15));
         add(login);
 
+        // Cancel button
         cancel = new JButton("Cancel");
         cancel.setBounds(180, 140, 120, 30);
         cancel.setBackground(Color.BLACK);
         cancel.setForeground(Color.WHITE);
         cancel.addActionListener(this);
-        cancel.setFont(new Font("Tahoma", Font.BOLD, 15));
         add(cancel);
 
-        //login image 
-        ImageIcon i1 = new ImageIcon(ClassLoader.getSystemResource("pictures/hospital.png"));
-        Image i2 = i1.getImage().getScaledInstance(200, 200, Image.SCALE_DEFAULT);
-        ImageIcon i3 = new ImageIcon(i2);
-        JLabel image = new JLabel(i3);
+        // Image
+        ImageIcon icon = new ImageIcon(ClassLoader.getSystemResource("pictures/hospital.png"));
+        Image img = icon.getImage().getScaledInstance(200, 200, Image.SCALE_DEFAULT);
+        JLabel image = new JLabel(new ImageIcon(img));
         image.setBounds(350, 20, 200, 200);
         add(image);
 
-
-
-        setSize(600, 300);
-        setLocation(500, 250);
         setVisible(true);
-
-
-    
     }
 
-    public void actionPerformed(ActionEvent ae){
+    @Override
+    public void actionPerformed(ActionEvent ae) {
         if (ae.getSource() == login) {
-            setVisible(false);
-            new Project();
-           
-        } try {
-            Thread.sleep(100);
-            setVisible(false);
-        }catch (Exception e){}
+            String username = tfusername.getText();
+            String password = new String(tfpassword.getPassword());
+            boolean found = false;
 
+            try (BufferedReader reader = new BufferedReader(new FileReader("txtlogin.txt"))) {
+                String line;
+                while ((line = reader.readLine()) != null) {
+                    String[] parts = line.split(",");
+                    if (parts[0].equals(username) && parts[1].equals(password)) {
+                        found = true;
+                        break;
+                    }
+                }
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Error reading data: " + e.getMessage());
+            }
+
+            if (found) {
+                JOptionPane.showMessageDialog(this, "Login successful!");
+                new Project(); // Move to the next screen or functionality
+                setVisible(false);
+            } else {
+                JOptionPane.showMessageDialog(this, "User not registered. Please register first.");
+            }
+        } else if (ae.getSource() == cancel) {
+            setVisible(false); // Close the login window
+        }
     }
-        
-
 
     public static void main(String[] args) {
-        new Login();
+        SwingUtilities.invokeLater(Login::new);
     }
 }
